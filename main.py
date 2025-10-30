@@ -38,3 +38,12 @@ def ask_inputs():
         print("End date cannot be before the begin date."); sys.exit(1)
 
     return symbol, chart_pick, series_pick, begin_date, end_date
+
+def series_params(series_pick):
+    if series_pick == "1":
+        return ("TIME_SERIES_INTRADAY", "Time Series (60min)", {"interval":"60min","outputsize":"full"}, "Intraday (60min)")
+    if series_pick == "2":
+        return ("TIME_SERIES_DAILY", "Time Series (Daily)", {"outputsize":"full"}, "Daily")
+    if series_pick == "3":
+        return ("TIME_SERIES_WEEKLY", "Weekly Time Series", {}, "Weekly")
+    return ("TIME_SERIES_MONTHLY", "Monthly Time Series", {}, "Monthly")
