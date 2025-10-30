@@ -5,7 +5,7 @@ from pathlib import Path
 
 API_KEY = "CQTGP3IZCHMSUM53"
 
-def ask_inputs():
+def main():
     print("Stock Data Visualizer")
     print("---------------------\n")
     symbol = input("Enter the stock symbol you are looking for: ").strip().upper()
