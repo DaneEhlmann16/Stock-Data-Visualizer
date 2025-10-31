@@ -5,37 +5,58 @@ from pathlib import Path
 
 API_KEY = "CQTGP3IZCHMSUM53"
 
+def get_symbol():
+    while True:
+        symbol = input("Enter the stock symbol you are looking for: ").strip().upper()
+        if symbol:
+            return symbol
+        print("Please enter a valid stock symbol.\n")
+
+def get_chart_type():
+    while True:
+        print("\nChart Types")
+        print("------------")
+        print("1. Bar")
+        print("2. Line")
+        chart_pick = input("\nEnter the chart type you want (1, 2): ").strip()
+        if chart_pick in ("1", "2"):
+            return chart_pick
+        print("Invalid option. Please enter 1 or 2.\n")
+
+def get_series_type():
+    while True:
+        print("\nSelect the Time Series of the chart you want to Generate")
+        print("---------------------------------------------------------")
+        print("1. Intraday")
+        print("2. Daily")
+        print("3. Weekly")
+        print("4. Monthly")
+        series_pick = input("\nEnter the seires option (1, 2, 3, 4): ").strip()
+        if series_pick in ("1", "2", "3", "4"):
+            return series_pick
+        print("Invalid option. Please enter 1, 2, 3, or 4.\n")
+
+def get_dates():
+    while True:
+        begin_str = input("\nEnter the start Date (YYYY-MM-DD): ").strip()
+        end_str   = input("Enter the end Date (YYYY-MM-DD): ").strip()
+        try:
+            begin_date = datetime.strptime(begin_str, "%Y-%m-%d").date()
+            end_date   = datetime.strptime(end_str,   "%Y-%m-%d").date()
+            if end_date >= begin_date:
+                return begin_date, end_date
+            print("End date cannot be before the start date.\n")
+        except ValueError:
+            print("Dates must be YYYY-MM-DD.")
+  
 def main():
     print("Stock Data Visualizer")
     print("---------------------\n")
-    symbol = input("Enter the stock symbol you are looking for: ").strip().upper()
 
-    print("\nChart Types")
-    print("------------")
-    print("1. Bar")
-    print("2. Line")
-    chart_pick = input("\nEnter the chart type you want (1, 2): ").strip()
-
-    print("\nSelect the Time Series of the chart you want to Generate")
-    print("---------------------------------------------------------")
-    print("1. Intraday")
-    print("2. Daily")
-    print("3. Weekly")
-    print("4. Monthly")
-    series_pick = input("\nEnter the seires option (1, 2, 3, 4): ").strip()
-
-    begin_str = input("\nEnter the start Date (YYYY-MM-DD): ").strip()
-    end_str   = input("Enter the end Date (YYYY-MM-DD): ").strip()
-
-    if not symbol or chart_pick not in ("1","2") or series_pick not in ("1","2","3","4"):
-        print("Input error"); sys.exit(1)
-    try:
-        begin_date = datetime.strptime(begin_str, "%Y-%m-%d").date()
-        end_date   = datetime.strptime(end_str,   "%Y-%m-%d").date()
-    except:
-        print("Dates must be YYYY-MM-DD."); sys.exit(1)
-    if end_date < begin_date:
-        print("End date cannot be before the begin date."); sys.exit(1)
+    symbol = get_symbol()
+    chart_pick = get_chart_type()
+    series_pick = get_series_type()
+    begin_date, end_date = get_dates()
 
     return symbol, chart_pick, series_pick, begin_date, end_date
 
@@ -56,6 +77,9 @@ def fetch_plot(symbol, chart_type, series_type, start_date, end_date):
     params.update(extra)
 
     data = requests.get(url, params=params).json()
+    if key not in data:
+        print(f"Could not fetch data for {symbol}. Check the symbol or try again later.\n")
+        return
     time_series = data[key]
 
     dates = []
@@ -76,6 +100,10 @@ def fetch_plot(symbol, chart_type, series_type, start_date, end_date):
             high_prices.append(float(values["2. high"]))
             low_prices.append(float(values["3. low"]))
             close_prices.append(float(values["4. close"]))
+
+    if not dates:
+        print(f"No data found for {symbol} between {start_date} and {end_date}. Try different dates.\n")
+        return
 
     dates.reverse()
     open_prices.reverse()
